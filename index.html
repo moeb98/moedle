@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>moedle - a wordle clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+</head>
+<body>
+    <div class="headingcontainer">
+        <h1>moedle</h1>
+        <h3>a wordle clone</h3>
+    </div>
+    <div class="infoblock">
+        <div id="error" style="display: none"></div>
+        <div id="info" style="display: none"></div>
+    </div>
+    <button id="newgame" style="display: none;">New game</button>
+    <div id="board"></div>
+    <div id="keyboard">
+        <div class="row">
+            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>0</div><div><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="game-icon"><path
+                    fill="var(--color-tone-1)" d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"></path></svg></div>
+        </div>
+        <div class="row">
+            <div>Q</div><div>W</div><div>E</div><div>R</div><div>T</div><div>Z</div><div>U</div><div>I</div><div>O</div><div>P</div><div>Ü</div><div>ß</div>
+        </div>
+        <div class="row">
+            <div>A</div><div>S</div><div>D</div><div>F</div><div>G</div><div>H</div><div>J</div><div>K</div><div>L</div><div>Ö</div><div>Ä</div><div>/</div>
+        </div>
+        <div class="row">
+            <div>Y</div><div>X</div><div>C</div><div>V</div><div>B</div><div>N</div><div>M</div><div>-</div><div>.</div><div>;</div><div style="font-size: 70%; line-height: 200%">ENTER</div>
+        </div>
+    </div>
+<py-env>
+</py-env>
+<py-script>
+from js import document, console, setTimeout
+from pyodide import create_proxy
+from pyodide.http import pyfetch
+from pyodide import JsException
+import random
+import re
+
+wordlist = []
+word = None
+
+async def load_wordlist():
+    try:
+        response = await pyfetch(
+            url="https://raw.githubusercontent.com/moeb98/moedle/master/word_list.txt",
+            method="GET",
+            headers={"Content-Type": "text/plain"})
+        if response.ok:
+            data = await response.string()
+            console.log(data.split())
+            return data.split()
+    except JsException:
+        return None
+
+async def pick_word():
+    global wordlist, word, accept_input
+    wordlist = await load_wordlist()
+    word = random.choice(wordlist)
+    console.log("word: ", " ".join(list(word)))
+    accept_input = True
+
+setTimeout(create_proxy(pick_word), 0)
+
+tiles = []
+board = document.getElementById("board")
+for row in range(6):
+    tiles.append([])
+    for col in range(5):
+        tile = document.createElement("div")
+        board.appendChild(tile)
+        tiles[-1].append(tile)
+
+guess = ""
+guess_no = 0
+key_objects = {}
+accept_input = False
+
+def display_guess():
+    if guess_no > 5:
+        return
+    for i in range(5):
+        tiles[guess_no][i].textContent = ""
+    for pos, char in enumerate(list(guess)):
+        tiles[guess_no][pos].textContent = char
+
+def evaluate_guess():
+    global word, guess, guess_no, accept_input
+    correct_counter = 0
+    for pos, char in enumerate(list(guess)):
+        if char == word[pos]:
+            tiles[guess_no][pos].classList.add("nailedit")
+            key_objects[char].classList.add("nailedit")
+            correct_counter += 1
+        elif char in word:
+            tiles[guess_no][pos].classList.add("somewhere")
+            key_objects[char].classList.add("somewhere")
+        else:
+            tiles[guess_no][pos].classList.add("nope")
+            key_objects[char].classList.add("nope")
+    if correct_counter >= 5:
+        pyscript.write("error", "Correct!")
+        pyscript.write("info", f"„{guess}“ was the secret word.")
+        document.getElementById("error").style = "display: visible; color: darkgreen;"
+        document.getElementById("info").style = "display: visible;"
+        document.getElementById("newgame").style = "display: visible;"
+        accept_input = False
+    elif guess_no >= 5:
+        pyscript.write("error", "Game over!")
+        pyscript.write("info", f"„{word}“ was the secret word.")
+        document.getElementById("error").style = "display: visible;"
+        document.getElementById("info").style = "display: visible;"
+        document.getElementById("newgame").style = "display: visible;"
+        accept_input = False
+
+def check_enter():
+    global guess, guess_no, wordlist
+    if len(guess) != 5:
+        return
+    if guess not in wordlist:
+        pyscript.write("error", "I don't know that word!")
+        pyscript.write("info", f"„{guess}“ is not on my word list.")
+        document.getElementById("error").style = "display: visible;"
+        document.getElementById("info").style = "display: visible;"
+        return
+    evaluate_guess()
+    guess = ""
+    guess_no += 1
+
+def key_clicked(e):
+    global accept_input, guess
+    if not accept_input:
+        return
+    if len(guess) >= 5 and len(e.target.textContent) == 1:
+        guess = guess[:5]
+        display_guess()
+        return
+    match len(e.target.textContent):
+        case 0:
+            guess = guess[:-1]
+        case 1:
+            guess += e.target.textContent
+        case _:
+            check_enter()
+    display_guess()
+
+js_key_clicked = create_proxy(key_clicked)
+
+for row in document.getElementById("keyboard").childNodes:
+    for key in row.childNodes:
+        key.addEventListener("click", js_key_clicked)
+        if len(key.textContent) == 1:
+            key_objects[key.textContent] = key
+
+def key_down(e):
+    global accept_input, guess
+    if not accept_input:
+        return
+    if len(guess) >= 5 and len(e.key) == 1:
+        guess = guess[:5]
+        display_guess()
+        return
+    regex_matches = re.match(r'^(Enter|Backspace|[a-zA-Z0-9/-;\.öäüÖÄÜßẞ])$', e.key)
+    if not regex_matches:
+        display_guess()
+        return
+    match regex_matches.groups():
+        case ('Backspace',): guess = guess[:-1]
+        case ('Enter',): check_enter()
+        case ('ẞ',) | ('ß',): guess += "ß"
+        case _: guess += e.key.upper()
+    console.log(guess, e.key, e.key.upper())
+    display_guess()
+
+document.onkeydown = create_proxy(key_down)
+
+def new_game(event):
+    global word, guess, guess_no, accept_input
+    word = random.choice(wordlist)
+    guess = ""
+    guess_no = 0
+    console.log("word: ", " ".join(list(word)))
+    document.getElementById("error").style = "display: none;"
+    document.getElementById("info").style = "display: none;"
+    document.getElementById("newgame").style = "display: none;"
+    for line in tiles:
+        for tile in line:
+            tile.classList.remove("nailedit", "somewhere", "nope")
+            tile.textContent = ""
+    for i in key_objects:
+        key_objects[i].classList.remove("nailedit", "somewhere", "nope")
+    accept_input = True
+
+document.getElementById("newgame").addEventListener("click", create_proxy(new_game))
+
+</py-script>
+</body>
+</html>

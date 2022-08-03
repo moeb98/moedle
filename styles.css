@@ -1,0 +1,106 @@
+body {
+    background-color: #222;
+}
+
+.headingcontainer h1 {
+    font-size: 4em;
+    font-weight: lighter;
+    text-align: center;
+    color: #fff;
+}
+
+.headingcontainer h3 {
+    font-size: 1.16em;
+    font-weight: bold;
+    text-align: center;
+    margin-top: -0.6em;
+    color: darkred;
+}
+
+.infoblock {
+    margin: 1.5em;
+}
+
+#error {
+    font-weight: bold;
+    color: darkred;
+    text-align: center;
+}
+
+#info {
+    text-align: center;
+    color: lightgray;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 0.2em;
+    grid-auto-rows: minmax(2em, auto);
+    margin: auto;
+    width: 21em;
+}
+
+#board div {
+    border: 2px solid lightgray;
+    color: #bbb;
+    background-color: #222;
+    font-size: 2em;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    font-weight: bold;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#board .nailedit, #keyboard .row div.nailedit {
+    background-color: green;
+}
+
+#board .somewhere, #keyboard .row div.somewhere {
+    background-color: yellow;
+}
+
+#board .nope, #keyboard .row div.nope {
+    background-color: #666;
+}
+
+#keyboard {
+    margin: 1em;
+    text-align: center;
+}
+
+#keyboard .row div {
+    display: inline-block;
+    padding: 0.8em;
+    background: lightgray;
+    border-radius: 0.3em;
+    cursor: pointer;
+    margin: 0.17em;
+    line-height: 1.7em;
+    user-select: none;
+}
+
+#keyboard .row div:hover {
+    background-color: aquamarine;
+}
+
+#keyboard .row div svg {
+    display: inline-block;
+}
+
+button#newgame {
+    margin: 2em auto;
+    display: block;
+    background-color: lightgray;
+    padding: 0em 1em 0em 1em;
+    border-radius: 0.2em;
+    box-shadow: 0.1em 0.1em 0.3em gray;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+button#newgame:active {
+    box-shadow: 0.05em 0.05em 0.2em gray;
+}
