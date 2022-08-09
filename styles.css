@@ -31,6 +31,11 @@ body {
     color: darkred;
 }
 
+.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active {
+    border-color: rgb(114, 0, 0);
+    background-color: darkred;
+}
+
 .infoblock {
     margin: 1.5em;
 }
