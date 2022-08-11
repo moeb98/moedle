@@ -54,11 +54,7 @@
       <div class="container">
 
         <div class="starter-template">
-          <div class="infoblock">
-              <div id="error" ></div>
-              <div id="info" style="display: none"></div>
-          </div>
-          
+         
           <div id="board"></div>
           <div id="keyboard">
               <div class="row">
@@ -154,16 +150,12 @@ def evaluate_guess():
         pyscript.write("modal_title", "Correct!")
         pyscript.write("modal_content", f"„{guess}“ was the secret word.")
         document.getElementById("modal_title").style = "font-weight: bold; color: darkgreen;"
-        document.getElementById("error").style = "display: visible; color: darkgreen;"
-        document.getElementById("info").style = "display: visible;"
         document.getElementById("trigger_modal").click()
         accept_input = False
     elif guess_no >= 5:
         pyscript.write("modal_title", "Game over!")
         pyscript.write("modal_content", f"„{word}“ was the secret word.")
         document.getElementById("modal_title").style = "font-weight: bold; color: darkred;"
-        document.getElementById("error").style = "display: visible;"
-        document.getElementById("info").style = "display: visible;"
         document.getElementById("trigger_modal").click()
         accept_input = False
 
@@ -175,8 +167,6 @@ def check_enter():
         pyscript.write("modal_title", "I don't know that word!")
         pyscript.write("modal_content", f"„{guess}“ is not on my word list.")
         document.getElementById("modal_title").style = "font-weight: bold; color: darkred;"
-        document.getElementById("error").style = "display: visible;"
-        document.getElementById("info").style = "display: visible;"
         document.getElementById("trigger_modal").click()
         return
     evaluate_guess()
@@ -236,8 +226,6 @@ def new_game(event):
     guess = ""
     guess_no = 0
     console.log("word: ", " ".join(list(word)))
-    document.getElementById("error").style = "display: none;"
-    document.getElementById("info").style = "display: none;"   
     document.getElementById("newgame").blur(); 
     for line in tiles:
         for tile in line:
