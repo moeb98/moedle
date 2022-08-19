@@ -36,6 +36,11 @@ body {
     background-color: darkred;
 }
 
+.close {
+    color:#fff;
+    text-shadow: none;
+}
+
 .modal-content {
     background-color: #222;
     color: #fff;
