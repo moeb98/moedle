@@ -144,7 +144,7 @@ button#newgame:active {
         background: #eee;
         border-radius: 0.3em;
         cursor: pointer;
-        margin: 0.17em;
+        margin: 0.15em;
         line-height: 1.7em;
         user-select: none;
         font-size: x-large;
