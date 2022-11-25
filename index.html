@@ -56,6 +56,9 @@
         <div class="starter-template">
          
           <div id="board"></div>
+          <div id="info"><span>Played:&nbsp;</span><span id="played_games"></span>&nbsp;&nbsp;&nbsp;
+                         <span>Won:&nbsp;</span><span id="won_games"></span>&nbsp;&nbsp;&nbsp;
+                         <span>Percentage:&nbsp;</span><span id="won_games_percentage"></span></div>
           <div id="keyboard">
               <div class="row">
                   <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>0</div><div><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="game-icon"><path
@@ -124,6 +127,12 @@ guess_no = 0
 key_objects = {}
 accept_input = False
 
+game_no = 0
+game_success_no = 0
+pyscript.write("played_games", game_no)
+pyscript.write("won_games", game_success_no)
+pyscript.write("won_games_percentage", game_no)
+
 def display_guess():
     if guess_no > 5:
         return
@@ -133,7 +142,7 @@ def display_guess():
         tiles[guess_no][pos].textContent = char
 
 def evaluate_guess():
-    global word, guess, guess_no, accept_input
+    global word, guess, guess_no, accept_input, correct_counter, game_no, game_success_no
     correct_counter = 0
     for pos, char in enumerate(list(guess)):
         if char == word[pos]:
@@ -147,12 +156,20 @@ def evaluate_guess():
             tiles[guess_no][pos].classList.add("nope")
             key_objects[char].classList.add("nope")
     if correct_counter >= 5:
+        game_no += 1
+        game_success_no += 1
+        pyscript.write("played_games", game_no)
+        pyscript.write("won_games", game_success_no)
+        pyscript.write("won_games_percentage", "{:.0%}".format(game_success_no / game_no))
         pyscript.write("modal_title", "Correct!")
         pyscript.write("modal_content", f"„{guess}“ was the secret word.")
         document.getElementById("modal_title").style = "font-weight: bold; color: darkgreen;"
         document.getElementById("trigger_modal").click()
         accept_input = False
     elif guess_no >= 5:
+        game_no += 1
+        pyscript.write("played_games", game_no)
+        pyscript.write("won_games_percentage", "{:.0%}".format(game_success_no / game_no))
         pyscript.write("modal_title", "Game over!")
         pyscript.write("modal_content", f"„{word}“ was the secret word.")
         document.getElementById("modal_title").style = "font-weight: bold; color: darkred;"
