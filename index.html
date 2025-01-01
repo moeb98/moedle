@@ -5,8 +5,8 @@
     <title>moedle - a wordle clone</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.11.1/core.css" />
+    <script type="module" defer src="https://pyscript.net/releases/2024.11.1/core.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
 </head>
@@ -29,7 +29,7 @@
       </div>
     </div>
     <!-- Button trigger modal -->
-    <a id="trigger_modal" type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal" hidden>Trigger modal</a>
+    <a id="trigger_modal" type="button" class="btn-primary btn-lg" data-toggle="modal" data-target="#myModal" hidden>Trigger modal</a>
     
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -82,11 +82,12 @@
 </py-env>
 <py-script>
 from js import document, console, setTimeout
-from pyodide import create_proxy
+from pyodide.ffi import create_proxy
 from pyodide.http import pyfetch
-from pyodide import JsException
+from pyodide.ffi import JsException
 import random
 import re
+import pyscript
 
 wordlist = []
 word = None
@@ -129,9 +130,15 @@ accept_input = False
 
 game_no = 0
 game_success_no = 0
-pyscript.write("played_games", game_no)
-pyscript.write("won_games", game_success_no)
-pyscript.write("won_games_percentage", game_no)
+pg = document.getElementById("played_games")
+pg.innerHTML = game_no
+wg = document.getElementById("won_games")
+wg.innerHTML = game_success_no
+wgp = document.getElementById("won_games_percentage")
+wgp.innerHTML = game_no
+mt = document.getElementById("modal_title")
+mc = document.getElementById("modal_content")
+
 
 def display_guess():
     if guess_no > 5:
@@ -158,21 +165,21 @@ def evaluate_guess():
     if correct_counter >= 5:
         game_no += 1
         game_success_no += 1
-        pyscript.write("played_games", game_no)
-        pyscript.write("won_games", game_success_no)
-        pyscript.write("won_games_percentage", "{:.0%}".format(game_success_no / game_no))
-        pyscript.write("modal_title", "Correct!")
-        pyscript.write("modal_content", f"„{guess}“ was the secret word.")
-        document.getElementById("modal_title").style = "font-weight: bold; color: darkgreen;"
+        pg.innerHTML = game_no
+        wg.innerHTML = game_success_no
+        wgp.innerHTML = "{:.0%}".format(game_success_no / game_no)
+        mt.innerHTML = "Correct!"
+        mc.innerHTML = f"„{guess}“ was the secret word."
+        mt.style = "font-weight: bold; color: darkgreen;"
         document.getElementById("trigger_modal").click()
         accept_input = False
     elif guess_no >= 5:
         game_no += 1
-        pyscript.write("played_games", game_no)
-        pyscript.write("won_games_percentage", "{:.0%}".format(game_success_no / game_no))
-        pyscript.write("modal_title", "Game over!")
-        pyscript.write("modal_content", f"„{word}“ was the secret word.")
-        document.getElementById("modal_title").style = "font-weight: bold; color: darkred;"
+        pg.innerHTML = game_no
+        wgp.innerHTML = "{:.0%}".format(game_success_no / game_no)
+        mt.innerHTML = "Game over!"
+        mc.innerHTML = f"„{word}“ was the secret word."
+        mt.style = "font-weight: bold; color: darkred;"
         document.getElementById("trigger_modal").click()
         accept_input = False
 
@@ -181,9 +188,9 @@ def check_enter():
     if len(guess) != 5:
         return
     if guess not in wordlist:
-        pyscript.write("modal_title", "I don't know that word!")
-        pyscript.write("modal_content", f"„{guess}“ is not on my word list.")
-        document.getElementById("modal_title").style = "font-weight: bold; color: darkred;"
+        mt.innerHTML = "I don't know that word!"
+        mc.innerHTML = f"„{guess}“ is not on my word list."
+        mt.style = "font-weight: bold; color: darkred;"
         document.getElementById("trigger_modal").click()
         return
     evaluate_guess()
